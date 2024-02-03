@@ -16,7 +16,7 @@ timezone:
 
 title: afinoti # the main title
 
-tagline: Professional Blog # it will display as the sub-title
+tagline: Software Developer # it will display as the sub-title
 
 description: >- # used by seo meta and the atom feed
   My professional knowledge and experiences in the field of technology and software development.
