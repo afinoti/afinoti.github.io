@@ -3,12 +3,6 @@
 icon: fas fa-info-circle
 order: 4
 ---
-
-> Add Markdown syntax content to file `_tabs/about.md`{: .filepath } and it will show up on this page.
-> # {: .prompt-tip }
-
-# [Airton Finoti](https://www.linkedin.com/in/airton-gomes-finoti-b219b67/)
-
 ## Professional Background
 
 Passionate about computer science since 2004, I've immersed myself in diverse projects, from on-premise to cloud. As an engineer, team lead, and IT enthusiast, I enjoy unraveling connections, optimizing algorithms, and crafting efficient, elegant code.
