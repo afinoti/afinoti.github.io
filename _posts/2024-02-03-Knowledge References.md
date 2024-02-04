@@ -22,4 +22,4 @@ List of many great content links.
 
 ### Carrer
 
-- [**Walter Rodrigues**](https://www.linkedin.com/pulse/dissecando-carreira-do-software-engineering-staff-e-walter-rodrigues/) - Dissecando a carreira do Software Engineering Specialist (Staff, Principal e Distinguished Engineer) :pt:
+- [**Walter Rodrigues**](https://www.linkedin.com/pulse/dissecando-carreira-do-software-engineering-staff-e-walter-rodrigues/) - Dissecando a carreira do Software Engineering Specialist (Staff, Principal e Distinguished Engineer) :brazil:
