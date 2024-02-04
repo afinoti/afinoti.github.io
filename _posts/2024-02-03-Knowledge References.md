@@ -26,6 +26,10 @@ List of many great content links.
 - [**Martin Fowler**](https://martinfowler.com/) - :us: Author, speaker, and consultant on software development. Known for his work on refactoring, patterns, and agile software development. (legendas :brazil:)
 
 
-### Carrer
+### Career
 
 - [**Walter Rodrigues**](https://www.linkedin.com/pulse/dissecando-carreira-do-software-engineering-staff-e-walter-rodrigues/) - :brazil: Dissecando a carreira do Software Engineering Specialist (Staff, Principal e Distinguished Engineer) 
+
+### Web development
+
+- [**Real Favicon Generator**](https://realfavicongenerator.net/) - :us: Favicon generator for all platforms: iOS, Android, PC/Mac, Windows 8.1/10, and more.
