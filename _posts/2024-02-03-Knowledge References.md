@@ -17,9 +17,9 @@ List of many great content links.
 
 - [**Mark Richards**](https://www.developertoarchitect.com/lessons) - Renowned software architect, author, and speaker, specializing in enterprise and microservices architecture. Known for simplifying complex concepts. 🇺🇸 (youtube subtitles available)
 
-- [**Martin Fowler**](https://martinfowler.com/) - Author, speaker, and consultant on software development. Known for his work on refactoring, patterns, and agile software development. 🇺🇸 (youtube subtitles available)
+- [**Martin Fowler**](https://martinfowler.com/) - Author, speaker, and consultant on software development. Known for his work on refactoring, patterns, and agile software development. :🇺🇸: (youtube subtitles available)
 
 
 ### Carrer
 
-- [**Walter Rodrigues**](https://www.linkedin.com/pulse/dissecando-carreira-do-software-engineering-staff-e-walter-rodrigues/) - Dissecando a carreira do Software Engineering Specialist (Staff, Principal e Distinguished Engineer) 🇧🇷
+- [**Walter Rodrigues**](https://www.linkedin.com/pulse/dissecando-carreira-do-software-engineering-staff-e-walter-rodrigues/) - Dissecando a carreira do Software Engineering Specialist (Staff, Principal e Distinguished Engineer) :🇧🇷: :+1:
