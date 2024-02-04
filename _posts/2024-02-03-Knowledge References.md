@@ -15,17 +15,17 @@ List of many great content links.
 
 ### Software development
 
-- [**Refactoring Guru**](https://refactoring.guru/design-patterns) - Design Patterns and Refactoring. :us:
+- [**Refactoring Guru**](https://refactoring.guru/design-patterns) - :us: Design Patterns and Refactoring. 
 
 
 ### Software architecture
 
 
-- [**Mark Richards**](https://www.developertoarchitect.com/lessons) - Renowned software architect, author, and speaker, specializing in enterprise and microservices architecture. Known for simplifying complex concepts. :us: (legendas disponíveis :brazil:)
+- [**Mark Richards**](https://www.developertoarchitect.com/lessons) - :us: Renowned software architect, author, and speaker, specializing in enterprise and microservices architecture. Known for simplifying complex concepts. (legendas :brazil:)
 
-- [**Martin Fowler**](https://martinfowler.com/) - Author, speaker, and consultant on software development. Known for his work on refactoring, patterns, and agile software development. :us: (legendas disponíveis :brazil:)
+- [**Martin Fowler**](https://martinfowler.com/) - :us: Author, speaker, and consultant on software development. Known for his work on refactoring, patterns, and agile software development. (legendas :brazil:)
 
 
 ### Carrer
 
-- [**Walter Rodrigues**](https://www.linkedin.com/pulse/dissecando-carreira-do-software-engineering-staff-e-walter-rodrigues/) - Dissecando a carreira do Software Engineering Specialist (Staff, Principal e Distinguished Engineer) :brazil:
+- [**Walter Rodrigues**](https://www.linkedin.com/pulse/dissecando-carreira-do-software-engineering-staff-e-walter-rodrigues/) - :brazil: Dissecando a carreira do Software Engineering Specialist (Staff, Principal e Distinguished Engineer) 
