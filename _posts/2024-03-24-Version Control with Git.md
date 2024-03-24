@@ -1,7 +1,7 @@
 ---
-title: Knowledge References
+title: Version Control with Git
 author: afinoti
-date: 2024-02-03 10:55:00 +0800
+date: 2024-03-24 09:38:00 +0800
 categories: [Blogging, References]
 tags: [software, versioning, git]
 pin: true
