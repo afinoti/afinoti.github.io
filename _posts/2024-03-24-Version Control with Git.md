@@ -66,3 +66,57 @@ While `git merge` preserves history, `git rebase` rewrites it to create a clean,
 If you rebase commits that exist on a remote server (like GitHub), you change the history that other developers have already downloaded. When they try to sync their work, their history will conflict with your "new" history, causing massive merge conflicts for everyone.
 
 **Rule of Thumb:** Only rebase local, unpushed commits to clean up your own messy history before sharing it.
+
+---
+
+### 4. What Each Command Really Does in the Graph
+
+#### 1. `git checkout` → Moves HEAD
+
+Checkout doesn't change history.
+
+It simply says: "I want to look at this other commit."
+
+HEAD moves. The branch continues pointing to the same place.
+
+**Use when:**
+You want to navigate history, test something, or create a branch from an old commit.
+
+**Mental model:**
+📍 You move the "where I'm looking" marker — nothing in the graph changes.
+
+#### 2. `git reset` → Moves the Branch
+
+Reset rewrites the branch pointer.
+
+It says: "This branch should no longer point here; now it should point there."
+
+The effects on files depend on whether it was `--soft`, `--mixed`, or `--hard`.
+
+**Use when:**
+You want to rewrite your own local history before pushing.
+
+**Mental model:**
+🔁 You take the branch sticky note and paste it on another commit.
+
+#### 3. `git revert` → Creates a New Commit
+
+Unlike reset, revert doesn't erase history.
+
+It creates a commit that undoes the effect of another commit.
+
+It doesn't move HEAD backward; it adds a new commit.
+
+**Use when:**
+You've already pushed to the team and need to undo something without breaking shared history.
+
+**Mental model:**
+➕ You create a new node in the graph that "cancels out" another node.
+
+#### Quick Summary
+
+| Command | What it changes? | Safety | Ideal use |
+|---------|------------------|--------|----------|
+| `checkout` | Moves HEAD | Safe | Navigate history, switch branches |
+| `reset` | Moves the branch | Dangerous (if already pushed) | Rewrite local commits |
+| `revert` | Adds new commit | Safe | Undo already shared commits |
