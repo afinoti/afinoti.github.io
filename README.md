@@ -2,7 +2,6 @@
 
 Organize and share my favorite link and resources about softwqre development, cloud, and programming.
 
-
 ## How ?
 
 ### Github template: Chirpy Starter Repository
