@@ -4,7 +4,7 @@ title: Application Architecture
 
 # Application Architecture
 
-**Application Architecture** is one of the four domains of [TOGAF](/posts/2026-06-12-TOGAF), defined within **Phase C: Information Systems Architecture** of the ADM alongside [Data Architecture](/concepts/data-architecture). It describes the individual application systems, their responsibilities, and how they interact with each other and with the rest of the enterprise.
+**Application Architecture** is one of the four domains of [TOGAF](/posts/TOGAF/), defined within **Phase C: Information Systems Architecture** of the ADM alongside [Data Architecture](/concepts/data-architecture). It describes the individual application systems, their responsibilities, and how they interact with each other and with the rest of the enterprise.
 
 Its purpose is to ensure that application capabilities are clearly defined, logically organized, and traceable from business needs down to the software that is actually deployed.
 

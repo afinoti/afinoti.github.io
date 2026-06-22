@@ -4,7 +4,7 @@ title: Technology Architecture
 
 # Technology Architecture
 
-**Technology Architecture** is one of the four domains of [TOGAF](/posts/2026-06-12-TOGAF), defined within **Phase D** of the ADM. It describes the technology infrastructure — hardware, software platforms, and services — required to support the [Application Architecture](/concepts/application-architecture) and [Data Architecture](/concepts/data-architecture).
+**Technology Architecture** is one of the four domains of [TOGAF](/posts/TOGAF/), defined within **Phase D** of the ADM. It describes the technology infrastructure — hardware, software platforms, and services — required to support the [Application Architecture](/concepts/application-architecture) and [Data Architecture](/concepts/data-architecture).
 
 Its purpose is to ensure that technology choices are driven by architecture needs, not by ad-hoc decisions — and that infrastructure capabilities are clearly defined, logically organized, and traceable from application requirements down to the technology that is actually running.
 

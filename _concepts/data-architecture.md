@@ -4,7 +4,7 @@ title: Data Architecture
 
 # Data Architecture
 
-**Data Architecture** is one of the four domains of [TOGAF](/posts/2026-06-12-TOGAF), defined within **Phase C: Information Systems Architecture** of the ADM. It describes the structure of an organization's logical and physical data assets and the resources used to manage them.
+**Data Architecture** is one of the four domains of [TOGAF](/posts/TOGAF/), defined within **Phase C: Information Systems Architecture** of the ADM. It describes the structure of an organization's logical and physical data assets and the resources used to manage them.
 
 Its purpose is to ensure that data is treated as a strategic asset — consistently defined, well-governed, and aligned with business needs regardless of the technology used to store or process it.
 
