@@ -58,7 +58,7 @@ To understand how the three levels relate, consider a single business concept �
 
 **What it looks like:** A named box in a conceptual diagram, with no attributes, no data types, no technology — just the concept and its relationships to other entities.
 
-```
+```text
 [Customer] --places--> [Order]
 [Order]    --contains--> [Product]
 ```
@@ -75,7 +75,7 @@ To understand how the three levels relate, consider a single business concept �
 
 **What it looks like:** A logical ER diagram with attributes and cardinalities, but no specific data types or storage details:
 
-```
+```text
 Customer Profile
 ├── Customer  { id, name, email }
 │     └── has many → Address { id, street, city, zip }

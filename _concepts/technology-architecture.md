@@ -58,7 +58,7 @@ To understand how the three levels relate, consider a single infrastructure need
 
 **What it looks like:** A named capability with no product attached:
 
-```
+```text
 [Application Architecture need: deploy customer-service]
   └── requires --> [Technology Service: Container Execution]
 ```
@@ -75,7 +75,7 @@ To understand how the three levels relate, consider a single infrastructure need
 
 **What it looks like:** A logical technology component diagram:
 
-```
+```text
 [Container Platform]
   ├── provides --> Container Execution
   ├── provides --> Service Discovery

@@ -58,7 +58,7 @@ To understand how the three levels relate, consider a single business need — *
 
 **What it looks like:** A named capability in a diagram with no technology attached:
 
-```
+```text
 [Business Process: Onboarding]
   └── requires --> [Application Service: Customer Registration]
 ```
@@ -75,7 +75,7 @@ To understand how the three levels relate, consider a single business need — *
 
 **What it looks like:** A logical component diagram:
 
-```
+```text
 [Customer Management]
   ├── provides --> Customer Registration
   ├── provides --> Customer Profile Update
