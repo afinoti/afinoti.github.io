@@ -2,17 +2,25 @@
 title: Chatbot de Atendimento
 ---
 
-# Chatbot de Atendimento
+# Chatbot de Atendimento e App Android
 
-Este exemplo mapeia um sistema real de chatbot aos dez conceitos arquiteturais do [TOGAF](/posts/TOGAF/): um [Business Service](/concepts/business-service), três níveis de [Application Architecture](/concepts/application-architecture), três níveis de [Data Architecture](/concepts/data-architecture), e três níveis de [Technology Architecture](/concepts/technology-architecture).
+Este exemplo mapeia dois sistemas reais aos dez conceitos arquiteturais do [TOGAF](/posts/TOGAF/): um [Business Service](/concepts/business-service), três níveis de [Application Architecture](/concepts/application-architecture), três níveis de [Data Architecture](/concepts/data-architecture), e três níveis de [Technology Architecture](/concepts/technology-architecture).
 
-## Sobre o Sistema
+## Sobre os Sistemas
 
-O sistema de chatbot oferece atendimento ao cliente por dois canais: interface web (`/atendimento`) e WhatsApp. O chatbot entrega duas capacidades de negócio distintas: **atendimento pós-venda** (FAQ e consulta de pedidos) e **descoberta de catálogo** (busca de produtos por linguagem natural, com retorno de carrossel).
+### Chatbot
 
-Para consultas de pedido, o chatbot exige que o usuário esteja autenticado — caso contrário, redireciona para `/login`. Após a autenticação, o usuário retorna ao canal de origem com acesso completo.
+O chatbot oferece atendimento ao cliente por dois canais: interface web (`/atendimento`) e WhatsApp. Entrega duas capacidades de negócio: **atendimento pós-venda** (FAQ e consulta de pedidos) e **descoberta de catálogo** (busca de produtos por linguagem natural, com retorno de carrossel).
 
-Internamente, o chatbot é composto por: um frontend React (canal web), um backend Go de orquestração, um backend Python de atendimento rodando no AWS Bedrock Runtime, e um **Fashion Agent** — microserviço Python separado também no Bedrock Runtime — responsável pela busca de catálogo. O canal WhatsApp é integrado via **Braze**. As consultas de pedido são feitas via API ao Orders Microservice. O catálogo é acessado via duas APIs externas: **Catalog Search API** (retorna SKUs por critério) e **Product API** (retorna detalhes e preço por SKU). A autenticação é gerenciada por um Auth Service em Go que encapsula uma instância Keycloak.
+Para consultas de pedido, o chatbot exige autenticação — caso contrário, redireciona para `/login`. Após autenticação, o usuário retorna ao canal de origem.
+
+Internamente: frontend React (canal web), backend Go de orquestração, backend Python de atendimento no AWS Bedrock Runtime, e um **Fashion Agent** — microserviço Python separado no Bedrock Runtime — responsável pela busca de catálogo. O canal WhatsApp é integrado via **Braze**. Consultas de pedido vão ao Orders Microservice via API. O catálogo é acessado via **Catalog Search API** (SKUs por critério) e **Product API** (detalhes e preço por SKU). Autenticação via Auth Service em Go que encapsula Keycloak.
+
+### App Android
+
+O app Android (disponível na Google Play Store) também entrega **descoberta de catálogo** — o mesmo Business Service do chatbot, em canal diferente. Além da busca de produtos, o app oferece **estimativa de custo e prazo de entrega** antes da compra, funcionalidade não disponível no chatbot.
+
+O app Flutter comunica-se com o backend através de um **BFF** (Backend for Frontend) exposto via AWS API Gateway. O BFF é um microserviço Go em Kubernetes que agrega chamadas ao catálogo e ao Delivery Estimator. O **Delivery Estimator** é um microserviço Go interno em Kubernetes que consulta uma API logística de terceiros para calcular frete.
 
 ---
 
@@ -30,11 +38,14 @@ A capacidade de suporte pós-venda: responder dúvidas e consultar pedidos sem d
 
 ### Descoberta de Catálogo
 
-A capacidade de explorar o catálogo de produtos por linguagem natural e receber sugestões visuais.
+A capacidade de explorar o catálogo de produtos e receber sugestões com informações suficientes para uma decisão de compra.
 
 - **Quem consome:** qualquer visitante — não exige autenticação
-- **Realizado por:** Product Catalog Search application service
+- **Realizado por:** Product Catalog Search + Shipping Cost Estimation application services
+- **Canais:** Chatbot (web e WhatsApp) e App Android
 - **Outcome de negócio:** aumento de descoberta de produtos e conversão pré-venda
+
+> O mesmo Business Service é realizado por dois sistemas distintos. O chatbot entrega Product Catalog Search via linguagem natural; o app entrega Product Catalog Search via navegação visual e acrescenta Shipping Cost Estimation. O Business Service não muda — o que muda são os Application Services disponíveis em cada canal.
 
 ---
 
@@ -48,7 +59,8 @@ Os três serviços que a aplicação precisa oferecer para realizar o Business S
 |---|---|
 | **FAQ Query** | Capacidade de responder perguntas frequentes com base em uma base de conhecimento |
 | **Order Status Inquiry** | Capacidade de consultar o status dos pedidos de compra de um cliente |
-| **Product Catalog Search** | Capacidade de buscar produtos no catálogo por critério em linguagem natural e retornar uma lista de resultados |
+| **Product Catalog Search** | Capacidade de buscar produtos no catálogo por critério e retornar uma lista de resultados — disponível no chatbot (linguagem natural) e no app (navegação visual) |
+| **Shipping Cost Estimation** | Capacidade de estimar custo e prazo de entrega de um produto para um CEP — disponível apenas no app |
 | **User Authentication** | Capacidade de autenticar um usuário antes de acessar dados protegidos |
 
 ---
@@ -74,13 +86,33 @@ Agrupamentos lógicos que realizam os Application Services, sem referência a te
 
 **Catalog Search**
 - Realiza: Product Catalog Search (parcialmente — busca por SKU)
-- Expõe: API consumida pelo Fashion Agent
-- Nota: sistema externo, não pertence ao domínio do chatbot
+- Expõe: API consumida pelo Fashion Agent e pelo App BFF
+- Nota: sistema externo, não pertence ao domínio do chatbot nem do app
 
 **Product Catalog**
 - Realiza: Product Catalog Search (parcialmente — detalhes por SKU)
-- Expõe: API consumida pelo Fashion Agent
-- Nota: sistema externo, não pertence ao domínio do chatbot
+- Expõe: API consumida pelo Fashion Agent e pelo App BFF
+- Nota: sistema externo, não pertence ao domínio do chatbot nem do app
+
+**Android App**
+- Realiza: Product Catalog Search, Shipping Cost Estimation (interface com o usuário)
+- Depende de: App BFF (todas as chamadas de dados passam pelo BFF)
+- Canal: Google Play Store, dispositivos Android
+
+**App BFF**
+- Agrega: chamadas ao Catalog Search, Product Catalog e Delivery Estimator
+- Expõe: API unificada consumida pelo Android App via AWS API Gateway
+- Depende de: Catalog Search, Product Catalog, Delivery Estimator
+
+**Delivery Estimator**
+- Realiza: Shipping Cost Estimation
+- Expõe: API REST com entrada `{sku, cep}` e saída `{custo, prazo_dias}`; consumida pelo App BFF
+- Depende de: Logistics API (terceiro)
+
+**Logistics API**
+- Realiza: Shipping Cost Estimation (cálculo efetivo de frete)
+- Expõe: API consumida pelo Delivery Estimator
+- Nota: sistema externo de terceiro (logística), não pertence ao domínio do app
 
 **Order Management**
 - Realiza: Order Status Inquiry
@@ -106,6 +138,10 @@ As implementações concretas, com tecnologia e modelo de deploy definidos:
 | **Braze** | WhatsApp Connector | SaaS — recebe mensagens do WhatsApp e repassa ao Chatbot Go Service |
 | **Catalog Search API** | Catalog Search | API externa — retorna lista de SKUs por critério |
 | **Product API** | Product Catalog | API externa — retorna detalhes e preço por SKU |
+| **Flutter Android App** | Android App | Flutter, distribuído via Google Play Store |
+| **App BFF Service** | App BFF | Go, container em Kubernetes — exposto via AWS API Gateway |
+| **Delivery Estimator Service** | Delivery Estimator | Go, container em Kubernetes |
+| **Logistics API** | Logistics API | API externa de terceiro — cálculo de frete |
 | **Orders Microservice** | Order Management | Go, container em Kubernetes |
 | **Auth Service** | Gateway do Identity Provider | Go, container em Kubernetes |
 | **Keycloak** | Core do Identity Provider | Keycloak, container em Kubernetes |
@@ -187,6 +223,7 @@ Um Technology Service descreve **o que a infraestrutura precisa ser capaz de faz
 | **LLM Inference** | Invocar um modelo de linguagem para gerar respostas em linguagem natural |
 | **Data Persistence** | Armazenar e recuperar dados com durabilidade — independente do modelo de armazenamento |
 | **External Channel Communication** | Enviar e receber mensagens via plataformas externas de mensageria (WhatsApp, SMS, push) |
+| **API Management** | Expor, rotear e proteger APIs HTTP para clientes externos (mobile, web, parceiros) |
 | **Identity Token Management** | Emitir, validar e revogar tokens de autenticação de usuários |
 
 ---
@@ -220,6 +257,11 @@ Um Logical Technology Component é uma **classe de produto de tecnologia**, inde
 - O que é a classe: plataforma SaaS de engajamento multicanal que conecta sistemas internos ao WhatsApp Business API e outros canais externos (ex: Braze, Twilio, Infobip)
 - Usado neste sistema: pelo WhatsApp Connector para receber e enviar mensagens via WhatsApp
 
+**API Gateway**
+- Realiza: API Management
+- O que é a classe: serviço gerenciado que recebe requisições HTTP de clientes externos, aplica autenticação, rate limiting e roteamento, e repassa ao backend (ex: AWS API Gateway, Kong, Apigee)
+- Usado neste sistema: expõe o App BFF Service ao Flutter Android App
+
 **Identity Server**
 - Realiza: Identity Token Management
 - O que é a classe: software especializado em autenticação e autorização, emissão de tokens OAuth2/OIDC (ex: Keycloak, Auth0, Okta)
@@ -238,6 +280,7 @@ O produto concreto escolhido para implementar cada Logical Technology Component 
 | **AWS RDS PostgreSQL** | Relational Database Engine | PostgreSQL no Amazon RDS |
 | **AWS S3** | Object Store | Amazon Simple Storage Service |
 | **Braze** | Messaging Platform Adapter | Braze SaaS — plataforma de engajamento multicanal |
+| **AWS API Gateway** | API Gateway | Amazon API Gateway — gerenciado pela AWS |
 | **Keycloak on EKS** | Identity Server | Keycloak, container no Amazon EKS |
 
 ---
@@ -247,15 +290,15 @@ O produto concreto escolhido para implementar cada Logical Technology Component 
 | Conceito | Instância neste sistema |
 |---|---|
 | **Business Service** | Atendimento ao Cliente · Descoberta de Catálogo |
-| **Application Service** | FAQ Query · Order Status Inquiry · Product Catalog Search · User Authentication |
-| **Logical Application Component** | Chatbot · WhatsApp Connector · Fashion Agent · Catalog Search · Product Catalog · Order Management · Identity Provider |
-| **Physical Application Component** | React Frontend · Chatbot Go Service · Chatbot Python AI Service · Fashion Agent Service · Braze · Catalog Search API · Product API · Orders Microservice · Auth Service · Keycloak |
+| **Application Service** | FAQ Query · Order Status Inquiry · Product Catalog Search · Shipping Cost Estimation · User Authentication |
+| **Logical Application Component** | Chatbot · WhatsApp Connector · Fashion Agent · Android App · App BFF · Delivery Estimator · Catalog Search · Product Catalog · Logistics API · Order Management · Identity Provider |
+| **Physical Application Component** | React Frontend · Chatbot Go Service · Chatbot Python AI Service · Fashion Agent Service · Braze · Flutter Android App · App BFF Service · Delivery Estimator Service · Logistics API · Catalog Search API · Product API · Orders Microservice · Auth Service · Keycloak |
 | **Data Entity** | Customer · Order · FAQ Article · Chat Message · Conversation · Product · SKU |
 | **Logical Data Component** | Customer Profile · Order History · Knowledge Base · Conversation History · Product Catalog |
 | **Physical Data Component** | Chatbot PostgreSQL (AWS RDS) · Conversation Archive (AWS S3) · Orders DB · Keycloak DB |
-| **Technology Service** | Container Execution · LLM Inference · Data Persistence · External Channel Communication · Identity Token Management |
-| **Logical Technology Component** | Container Orchestrator · Managed LLM Runtime · Relational Database Engine · Object Store · Messaging Platform Adapter · Identity Server |
-| **Physical Technology Component** | Amazon EKS · AWS Bedrock Runtime · AWS RDS PostgreSQL · AWS S3 · Braze · Keycloak on EKS |
+| **Technology Service** | Container Execution · LLM Inference · Data Persistence · External Channel Communication · API Management · Identity Token Management |
+| **Logical Technology Component** | Container Orchestrator · Managed LLM Runtime · Relational Database Engine · Object Store · Messaging Platform Adapter · API Gateway · Identity Server |
+| **Physical Technology Component** | Amazon EKS · AWS Bedrock Runtime · AWS RDS PostgreSQL · AWS S3 · Braze · AWS API Gateway · Keycloak on EKS |
 
 ---
 
