@@ -173,6 +173,9 @@ collections:
   concepts:
     output: true
     sort_by: title
+  examples:
+    output: true
+    sort_by: title
 
 defaults:
   - scope:
@@ -201,6 +204,12 @@ defaults:
     values:
       layout: concept
       permalink: /concepts/:title/
+  - scope:
+      path: ""
+      type: examples
+    values:
+      layout: example
+      permalink: /examples/:title/
 
 sass:
   style: compressed
