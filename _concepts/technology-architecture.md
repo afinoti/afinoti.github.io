@@ -85,20 +85,7 @@ To understand how the three levels relate, consider a single infrastructure need
 
 **What it is:** The actual infrastructure that implements the `Container Platform` logical component — a specific product, version, and cloud provider configuration.
 
-**What it looks like:** Infrastructure-as-Code that provisions the actual resource:
-
-```terraform
-# terraform/eks-cluster.tf
-resource "aws_eks_cluster" "main" {
-  name     = "production"
-  version  = "1.29"
-  role_arn = aws_iam_role.eks.arn
-
-  vpc_config {
-    subnet_ids = var.subnet_ids
-  }
-}
-```
+**What it looks like:** An Infrastructure-as-Code file (e.g. a Terraform `.tf` file, a CloudFormation stack, or a Pulumi program) that declares the specific resource — with cluster name, version, cloud region, IAM roles, and network configuration all explicitly defined.
 
 **Where it lives:** The IaC repository (Terraform, CloudFormation, Pulumi) — and once applied, the actual running cluster or infrastructure resource in the cloud or data center.
 
