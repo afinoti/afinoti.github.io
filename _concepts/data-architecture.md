@@ -56,12 +56,10 @@ To understand how the three levels relate, consider a single business concept �
 
 **What it is:** An entry in the organization's **Entity Catalog** or **Business Glossary** — a document (or wiki page) that names and describes every business concept the organization tracks.
 
-**What it looks like:** A named box in a conceptual diagram, with no attributes, no data types, no technology — just the concept and its relationships to other entities.
+**What it looks like:** A named entry in a business glossary or a box in a conceptual diagram — no attributes, no data types, just the concept and its relationships to other entities:
 
-```text
-[Customer] --places--> [Order]
-[Order]    --contains--> [Product]
-```
+- **Customer** — places → **Order**
+- **Order** — contains → **Product**
 
 **Where it lives:** Architecture repository — conceptual data model, business glossary, or entity catalog artifact produced during TOGAF Phase C.
 
@@ -73,14 +71,10 @@ To understand how the three levels relate, consider a single business concept �
 
 **What it is NOT:** It is not a code class, package, or microservice. It is an architecture artifact — a box in a logical ER diagram or architecture drawing that says: *"these entities belong together and are managed as a unit."*
 
-**What it looks like:** A logical ER diagram with attributes and cardinalities, but no specific data types or storage details:
+**What it looks like:** A logical ER diagram with attributes and cardinalities, but no specific data types or storage details. The **Customer Profile** subject area groups:
 
-```text
-Customer Profile
-├── Customer  { id, name, email }
-│     └── has many → Address { id, street, city, zip }
-└── has one  → ContactInfo { phone, preferred_channel }
-```
+- **Customer** `{ id, name, email }` — has many → **Address** `{ id, street, city, zip }`
+- **Customer** — has one → **ContactInfo** `{ phone, preferred_channel }`
 
 **Where it lives:** Architecture repository — logical data model artifact, typically a diagram in a modeling tool (e.g. Archi, Sparx EA, draw.io) produced during TOGAF Phase C.
 

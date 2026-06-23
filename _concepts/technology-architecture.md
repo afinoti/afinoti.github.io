@@ -56,12 +56,9 @@ To understand how the three levels relate, consider a single infrastructure need
 
 **What it is:** An entry in the **Technology Service Catalog** — a document or architecture diagram that lists the infrastructure capabilities required, mapped to application needs.
 
-**What it looks like:** A named capability with no product attached:
+**What it looks like:** A named entry in a technology service catalog, mapped to an application need — no product or vendor attached:
 
-```text
-[Application Architecture need: deploy customer-service]
-  └── requires --> [Technology Service: Container Execution]
-```
+- **Application need:** deploy `customer-service` → requires → **Technology Service:** Container Execution
 
 **Where it lives:** Architecture repository — technology service catalog or infrastructure capability map artifact produced during TOGAF Phase D.
 
@@ -73,16 +70,12 @@ To understand how the three levels relate, consider a single infrastructure need
 
 **What it is NOT:** It is not a specific product, cloud provider, or configuration. It is an architecture artifact — a box in a technology diagram that says: *"these infrastructure capabilities belong together and are managed as a unit, with these interfaces."*
 
-**What it looks like:** A logical technology component diagram:
+**What it looks like:** A box in a technology component diagram with its capabilities and dependencies defined — no vendor, no product:
 
-```text
-[Container Platform]
-  ├── provides --> Container Execution
-  ├── provides --> Service Discovery
-  ├── provides --> Auto-scaling
-  ├── depends on --> [Persistent Storage]
-  └── exposes runtime to --> [Application Layer]
-```
+**Container Platform**
+- Provides: Container Execution, Service Discovery, Auto-scaling
+- Depends on: Persistent Storage
+- Exposes runtime to: Application Layer
 
 **Where it lives:** Architecture repository — logical technology component diagram, typically produced in a modeling tool (e.g. Archi, Sparx EA, draw.io) during TOGAF Phase D.
 

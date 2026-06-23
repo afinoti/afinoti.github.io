@@ -56,12 +56,9 @@ To understand how the three levels relate, consider a single business need — *
 
 **What it is:** An entry in the **Application Service Catalog** — a document or architecture diagram that lists the capabilities the application landscape must provide, mapped to business processes.
 
-**What it looks like:** A named capability in a diagram with no technology attached:
+**What it looks like:** A named entry in an application service catalog, mapped to a business process — no technology attached:
 
-```text
-[Business Process: Onboarding]
-  └── requires --> [Application Service: Customer Registration]
-```
+- **Business Process:** Onboarding → requires → **Application Service:** Customer Registration
 
 **Where it lives:** Architecture repository — service catalog or capability map artifact produced during TOGAF Phase C.
 
@@ -73,15 +70,12 @@ To understand how the three levels relate, consider a single business need — *
 
 **What it is NOT:** It is not a specific codebase, framework, or deployment unit. It is an architecture artifact — a box in a component diagram that says: *"these capabilities belong together and are managed as a unit, with these interfaces."*
 
-**What it looks like:** A logical component diagram:
+**What it looks like:** A box in a component diagram with its interfaces defined — no codebase, no technology:
 
-```text
-[Customer Management]
-  ├── provides --> Customer Registration
-  ├── provides --> Customer Profile Update
-  ├── depends on --> [Identity Provider]
-  └── exposes API to --> [Order Management]
-```
+**Customer Management**
+- Provides: Customer Registration, Customer Profile Update, Account Deactivation
+- Depends on: Identity Provider
+- Exposes API to: Order Management
 
 **Where it lives:** Architecture repository — logical application component diagram, typically produced in a modeling tool (e.g. Archi, Sparx EA, draw.io) during TOGAF Phase C.
 
