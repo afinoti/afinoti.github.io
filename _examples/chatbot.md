@@ -86,6 +86,8 @@ Os conceitos de negócio sobre os quais o sistema precisa guardar informação:
 - **Customer** — o cliente que acessa o chatbot
 - **Order** — um pedido de compra do cliente
 - **FAQ Article** — um par de pergunta e resposta da base de conhecimento
+- **Chat Message** — uma mensagem individual trocada entre o cliente e o chatbot
+- **Conversation** — uma sessão de atendimento composta por uma sequência de Chat Messages
 
 ---
 
@@ -105,19 +107,24 @@ Agrupamentos lógicos que estruturam as entidades com atributos e relacionamento
 - Agrupa: FAQ Article + categorias + metadata de relevância
 - Consumida pelo Chatbot Python AI Service para geração de respostas
 
+**Conversation History**
+- Agrupa: Conversation + Chat Messages (sequência de trocas entre cliente e chatbot)
+- Possui duas implementações físicas com propósitos distintos: acesso estruturado em tempo real (Go Service → PostgreSQL) e armazenamento bruto para contexto do LLM (Python AI Service → S3)
+
 ---
 
 ### Physical Data Components
 
 As implementações concretas de storage, ligadas a tecnologia específica:
 
-| Physical Data Component | Realiza | Tecnologia |
-|---|---|---|
-| **Chatbot PostgreSQL DB** | Customer Profile, Knowledge Base, histórico de conversas | PostgreSQL no AWS RDS |
-| **Orders DB** | Order History | Definido pelo domínio do Orders Microservice (não exposto neste escopo) |
-| **Keycloak DB** | Sessões e credenciais de usuários | Gerenciado internamente pelo Keycloak |
+| Physical Data Component | Realiza | Tecnologia | Gravado por |
+|---|---|---|---|
+| **Chatbot PostgreSQL DB** | Customer Profile, Knowledge Base, Conversation History (estruturada) | PostgreSQL no AWS RDS | Chatbot Go Service |
+| **Conversation Archive (S3)** | Conversation History (bruta) | AWS S3 | Chatbot Python AI Service |
+| **Orders DB** | Order History | Definido pelo domínio do Orders Microservice (não exposto neste escopo) | Orders Microservice |
+| **Keycloak DB** | Sessões e credenciais de usuários | Gerenciado internamente pelo Keycloak | Keycloak |
 
-> Cada Physical Data Component pertence ao domínio do componente de aplicação que o gerencia. O chatbot não acessa diretamente o banco do Orders Microservice — consome apenas a API exposta por ele.
+> **Um Logical Data Component, dois Physical Data Components.** O `Conversation History` é realizado por PostgreSQL e S3 simultaneamente — cada um servindo um propósito diferente: o Go Service salva no Postgres para consultas estruturadas em tempo real; o Python AI Service salva no S3 o histórico bruto para alimentar o contexto do LLM. Isso é válido no TOGAF: um Logical Data Component pode ter múltiplas implementações físicas quando os requisitos de acesso são diferentes.
 
 ---
 
@@ -131,7 +138,7 @@ Um Technology Service descreve **o que a infraestrutura precisa ser capaz de faz
 |---|---|
 | **Container Execution** | Executar workloads isolados e reproduzíveis como containers |
 | **LLM Inference** | Invocar um modelo de linguagem para gerar respostas em linguagem natural |
-| **Relational Data Persistence** | Armazenar e consultar dados estruturados com garantias transacionais (ACID) |
+| **Data Persistence** | Armazenar e recuperar dados com durabilidade — independente do modelo de armazenamento |
 | **Identity Token Management** | Emitir, validar e revogar tokens de autenticação de usuários |
 
 ---
@@ -151,9 +158,14 @@ Um Logical Technology Component é uma **classe de produto de tecnologia**, inde
 - Runs neste sistema: Chatbot Python AI Service
 
 **Relational Database Engine**
-- Realiza: Relational Data Persistence
+- Realiza: Data Persistence
 - O que é a classe: sistema gerenciador de banco de dados relacional com suporte a transações (ex: PostgreSQL, MySQL, Oracle DB)
 - Usado neste sistema: pelo Chatbot Go Service para persistência de dados do chatbot
+
+**Object Store**
+- Realiza: Data Persistence
+- O que é a classe: serviço de armazenamento de objetos sem esquema, acessado por chave (ex: AWS S3, Google Cloud Storage, Azure Blob Storage, MinIO)
+- Usado neste sistema: pelo Chatbot Python AI Service para gravar o histórico bruto de conversas
 
 **Identity Server**
 - Realiza: Identity Token Management
@@ -171,6 +183,7 @@ O produto concreto escolhido para implementar cada Logical Technology Component 
 | **Amazon EKS (Kubernetes)** | Container Orchestrator | Kubernetes gerenciado pela AWS |
 | **AWS Bedrock Runtime** | Managed LLM Runtime | Amazon Bedrock Runtime (managed) |
 | **AWS RDS PostgreSQL** | Relational Database Engine | PostgreSQL no Amazon RDS |
+| **AWS S3** | Object Store | Amazon Simple Storage Service |
 | **Keycloak on EKS** | Identity Server | Keycloak, container no Amazon EKS |
 
 ---
@@ -183,12 +196,12 @@ O produto concreto escolhido para implementar cada Logical Technology Component 
 | **Application Service** | FAQ Query · Order Status Inquiry · User Authentication |
 | **Logical Application Component** | Chatbot · Order Management · Identity Provider |
 | **Physical Application Component** | React Frontend · Chatbot Go Service · Chatbot Python AI Service · Orders Microservice · Auth Service · Keycloak |
-| **Data Entity** | Customer · Order · FAQ Article |
-| **Logical Data Component** | Customer Profile · Order History · Knowledge Base |
-| **Physical Data Component** | Chatbot PostgreSQL (AWS RDS) · Orders DB · Keycloak DB |
-| **Technology Service** | Container Execution · LLM Inference · Relational Data Persistence · Identity Token Management |
-| **Logical Technology Component** | Container Orchestrator · Managed LLM Runtime · Relational Database Engine · Identity Server |
-| **Physical Technology Component** | Amazon EKS · AWS Bedrock Runtime · AWS RDS PostgreSQL · Keycloak on EKS |
+| **Data Entity** | Customer · Order · FAQ Article · Chat Message · Conversation |
+| **Logical Data Component** | Customer Profile · Order History · Knowledge Base · Conversation History |
+| **Physical Data Component** | Chatbot PostgreSQL (AWS RDS) · Conversation Archive (AWS S3) · Orders DB · Keycloak DB |
+| **Technology Service** | Container Execution · LLM Inference · Data Persistence · Identity Token Management |
+| **Logical Technology Component** | Container Orchestrator · Managed LLM Runtime · Relational Database Engine · Object Store · Identity Server |
+| **Physical Technology Component** | Amazon EKS · AWS Bedrock Runtime · AWS RDS PostgreSQL · AWS S3 · Keycloak on EKS |
 
 ---
 
