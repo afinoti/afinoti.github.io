@@ -8,9 +8,9 @@ Este exemplo mapeia um sistema real de chatbot aos dez conceitos arquiteturais d
 
 ## Sobre o Sistema
 
-O sistema de chatbot oferece atendimento ao cliente via interface web (`/atendimento`). O usuário pode tirar dúvidas sobre FAQ e consultar seus pedidos de compra em aberto. Para consultas de pedido, o chatbot exige que o usuário esteja autenticado — caso contrário, redireciona para `/login`. Após a autenticação, o usuário retorna ao chatbot com acesso completo.
+O sistema de chatbot oferece atendimento ao cliente por dois canais: interface web (`/atendimento`) e WhatsApp. Em ambos os canais, o usuário pode tirar dúvidas sobre FAQ e consultar seus pedidos de compra. Para consultas de pedido, o chatbot exige que o usuário esteja autenticado — caso contrário, redireciona para `/login`. Após a autenticação, o usuário retorna ao canal de origem com acesso completo.
 
-Internamente, o chatbot é composto por três partes: um frontend React, um backend Go de orquestração, e um backend Python rodando inferência de LLM. As consultas de pedido são feitas via API ao Orders Microservice. A autenticação é gerenciada por um Auth Service em Go que encapsula uma instância Keycloak.
+Internamente, o chatbot é composto por três partes: um frontend React (canal web), um backend Go de orquestração, e um backend Python rodando inferência de LLM. O canal WhatsApp é integrado via **Braze**, que recebe as mensagens do WhatsApp e as repassa ao backend Go. As consultas de pedido são feitas via API ao Orders Microservice. A autenticação é gerenciada por um Auth Service em Go que encapsula uma instância Keycloak.
 
 ---
 
@@ -47,7 +47,12 @@ Agrupamentos lógicos que realizam os Application Services, sem referência a te
 **Chatbot**
 - Realiza: FAQ Query, Order Status Inquiry
 - Depende de: Order Management (para consultar pedidos), Identity Provider (para validar sessão)
-- Expõe: interface web em `/atendimento`
+- Recebe mensagens de: React Frontend (canal web) e WhatsApp Connector (canal WhatsApp)
+
+**WhatsApp Connector**
+- Realiza: FAQ Query, Order Status Inquiry (via canal WhatsApp)
+- Depende de: Chatbot (repassa mensagens ao core), Identity Provider (redireciona para `/login` quando sessão ausente, e retorna ao WhatsApp após autenticação)
+- Recebe mensagens de: WhatsApp (via Braze)
 
 **Order Management**
 - Realiza: Order Status Inquiry
@@ -66,14 +71,17 @@ As implementações concretas, com tecnologia e modelo de deploy definidos:
 
 | Physical Application Component | Realiza | Tecnologia e Deploy |
 |---|---|---|
-| **React Frontend** | Interface do Chatbot | React, servido em `/atendimento` |
+| **React Frontend** | Interface do Chatbot (canal web) | React, servido em `/atendimento` |
 | **Chatbot Go Service** | Orquestração do Chatbot | Go, container em Kubernetes |
 | **Chatbot Python AI Service** | Inferência LLM do Chatbot | Python, AWS Bedrock Runtime |
+| **Braze** | WhatsApp Connector | SaaS — recebe mensagens do WhatsApp e repassa ao Chatbot Go Service |
 | **Orders Microservice** | Order Management | Go, container em Kubernetes |
 | **Auth Service** | Gateway do Identity Provider | Go, container em Kubernetes |
 | **Keycloak** | Core do Identity Provider | Keycloak, container em Kubernetes |
 
 > O Auth Service é um Physical Application Component separado do Keycloak: ele encapsula e expõe o Keycloak como uma API própria, isolando os consumidores da dependência direta com o produto.
+
+> O Braze é um Physical Application Component do tipo SaaS: não roda em infraestrutura própria, mas realiza o WhatsApp Connector ao intermediar a comunicação entre o WhatsApp Business API e o backend do chatbot. O fluxo de autenticação pelo WhatsApp segue o mesmo caminho do canal web — quando o usuário não está autenticado, o Braze envia um link de login via WhatsApp; após a autenticação no Keycloak, o usuário é redirecionado de volta ao WhatsApp.
 
 ---
 
@@ -86,8 +94,8 @@ Os conceitos de negócio sobre os quais o sistema precisa guardar informação:
 - **Customer** — o cliente que acessa o chatbot
 - **Order** — um pedido de compra do cliente
 - **FAQ Article** — um par de pergunta e resposta da base de conhecimento
-- **Chat Message** — uma mensagem individual trocada entre o cliente e o chatbot
-- **Conversation** — uma sessão de atendimento composta por uma sequência de Chat Messages
+- **Chat Message** — uma mensagem individual trocada entre o cliente e o chatbot, com atributo `channel` (web | whatsapp)
+- **Conversation** — uma sessão de atendimento composta por uma sequência de Chat Messages, com atributo `channel` que identifica a origem
 
 ---
 
@@ -139,6 +147,7 @@ Um Technology Service descreve **o que a infraestrutura precisa ser capaz de faz
 | **Container Execution** | Executar workloads isolados e reproduzíveis como containers |
 | **LLM Inference** | Invocar um modelo de linguagem para gerar respostas em linguagem natural |
 | **Data Persistence** | Armazenar e recuperar dados com durabilidade — independente do modelo de armazenamento |
+| **External Channel Communication** | Enviar e receber mensagens via plataformas externas de mensageria (WhatsApp, SMS, push) |
 | **Identity Token Management** | Emitir, validar e revogar tokens de autenticação de usuários |
 
 ---
@@ -167,6 +176,11 @@ Um Logical Technology Component é uma **classe de produto de tecnologia**, inde
 - O que é a classe: serviço de armazenamento de objetos sem esquema, acessado por chave (ex: AWS S3, Google Cloud Storage, Azure Blob Storage, MinIO)
 - Usado neste sistema: pelo Chatbot Python AI Service para gravar o histórico bruto de conversas
 
+**Messaging Platform Adapter**
+- Realiza: External Channel Communication
+- O que é a classe: plataforma SaaS de engajamento multicanal que conecta sistemas internos ao WhatsApp Business API e outros canais externos (ex: Braze, Twilio, Infobip)
+- Usado neste sistema: pelo WhatsApp Connector para receber e enviar mensagens via WhatsApp
+
 **Identity Server**
 - Realiza: Identity Token Management
 - O que é a classe: software especializado em autenticação e autorização, emissão de tokens OAuth2/OIDC (ex: Keycloak, Auth0, Okta)
@@ -184,6 +198,7 @@ O produto concreto escolhido para implementar cada Logical Technology Component 
 | **AWS Bedrock Runtime** | Managed LLM Runtime | Amazon Bedrock Runtime (managed) |
 | **AWS RDS PostgreSQL** | Relational Database Engine | PostgreSQL no Amazon RDS |
 | **AWS S3** | Object Store | Amazon Simple Storage Service |
+| **Braze** | Messaging Platform Adapter | Braze SaaS — plataforma de engajamento multicanal |
 | **Keycloak on EKS** | Identity Server | Keycloak, container no Amazon EKS |
 
 ---
@@ -194,14 +209,14 @@ O produto concreto escolhido para implementar cada Logical Technology Component 
 |---|---|
 | **Business Service** | Atendimento ao Cliente |
 | **Application Service** | FAQ Query · Order Status Inquiry · User Authentication |
-| **Logical Application Component** | Chatbot · Order Management · Identity Provider |
-| **Physical Application Component** | React Frontend · Chatbot Go Service · Chatbot Python AI Service · Orders Microservice · Auth Service · Keycloak |
+| **Logical Application Component** | Chatbot · WhatsApp Connector · Order Management · Identity Provider |
+| **Physical Application Component** | React Frontend · Chatbot Go Service · Chatbot Python AI Service · Braze · Orders Microservice · Auth Service · Keycloak |
 | **Data Entity** | Customer · Order · FAQ Article · Chat Message · Conversation |
 | **Logical Data Component** | Customer Profile · Order History · Knowledge Base · Conversation History |
 | **Physical Data Component** | Chatbot PostgreSQL (AWS RDS) · Conversation Archive (AWS S3) · Orders DB · Keycloak DB |
-| **Technology Service** | Container Execution · LLM Inference · Data Persistence · Identity Token Management |
-| **Logical Technology Component** | Container Orchestrator · Managed LLM Runtime · Relational Database Engine · Object Store · Identity Server |
-| **Physical Technology Component** | Amazon EKS · AWS Bedrock Runtime · AWS RDS PostgreSQL · AWS S3 · Keycloak on EKS |
+| **Technology Service** | Container Execution · LLM Inference · Data Persistence · External Channel Communication · Identity Token Management |
+| **Logical Technology Component** | Container Orchestrator · Managed LLM Runtime · Relational Database Engine · Object Store · Messaging Platform Adapter · Identity Server |
+| **Physical Technology Component** | Amazon EKS · AWS Bedrock Runtime · AWS RDS PostgreSQL · AWS S3 · Braze · Keycloak on EKS |
 
 ---
 
