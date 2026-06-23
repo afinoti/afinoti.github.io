@@ -36,6 +36,30 @@ A capacidade de suporte pós-venda: responder dúvidas e consultar pedidos sem d
 - **Realizado por:** FAQ Query + Order Status Inquiry + User Authentication application services
 - **Outcome de negócio:** redução do volume de chamados no suporte e autonomia do cliente
 
+#### Service Quality
+
+Os atributos não-funcionais que definem *quão bem* este Business Service deve operar:
+
+| Atributo | Requisito |
+|---|---|
+| **Disponibilidade** | 99,5% em horário comercial (08h–22h, horário de Brasília) |
+| **Performance — FAQ** | Resposta em até 3 segundos para 95% das requisições |
+| **Performance — Pedido** | Resposta em até 5 segundos para 95% das requisições |
+| **Segurança** | Dados de pedido acessíveis somente ao cliente autenticado; histórico de conversa não exposto a terceiros |
+| **Idioma** | Suporte exclusivo em português brasileiro |
+| **Canais suportados** | Web (`/atendimento`) e WhatsApp |
+
+#### Contract
+
+O acordo formal entre o provedor do serviço e seu consumidor interno:
+
+- **Provedor:** time de produto (responsável pelo chatbot)
+- **Consumidor:** área de CX (Central de Atendimento)
+- **Vigência:** anual, renovável; revisão trimestral dos atributos de Quality
+- **Compromisso:** entrega do Business Service dentro dos atributos de Quality definidos acima
+- **Violação — P2:** disponibilidade abaixo de 99% por 7 dias corridos → abertura automática de incidente para revisão de capacidade
+- **Violação — P1:** tempo de resposta de FAQ acima de 10 segundos em média por 1 hora contínua → acionamento imediato do time de engenharia
+
 ### Descoberta de Catálogo
 
 A capacidade de explorar o catálogo de produtos e receber sugestões com informações suficientes para uma decisão de compra.
