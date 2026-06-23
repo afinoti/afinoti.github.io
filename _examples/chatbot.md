@@ -8,21 +8,33 @@ Este exemplo mapeia um sistema real de chatbot aos dez conceitos arquiteturais d
 
 ## Sobre o Sistema
 
-O sistema de chatbot oferece atendimento ao cliente por dois canais: interface web (`/atendimento`) e WhatsApp. Em ambos os canais, o usuário pode tirar dúvidas sobre FAQ e consultar seus pedidos de compra. Para consultas de pedido, o chatbot exige que o usuário esteja autenticado — caso contrário, redireciona para `/login`. Após a autenticação, o usuário retorna ao canal de origem com acesso completo.
+O sistema de chatbot oferece atendimento ao cliente por dois canais: interface web (`/atendimento`) e WhatsApp. O chatbot entrega duas capacidades de negócio distintas: **atendimento pós-venda** (FAQ e consulta de pedidos) e **descoberta de catálogo** (busca de produtos por linguagem natural, com retorno de carrossel).
 
-Internamente, o chatbot é composto por três partes: um frontend React (canal web), um backend Go de orquestração, e um backend Python rodando inferência de LLM. O canal WhatsApp é integrado via **Braze**, que recebe as mensagens do WhatsApp e as repassa ao backend Go. As consultas de pedido são feitas via API ao Orders Microservice. A autenticação é gerenciada por um Auth Service em Go que encapsula uma instância Keycloak.
+Para consultas de pedido, o chatbot exige que o usuário esteja autenticado — caso contrário, redireciona para `/login`. Após a autenticação, o usuário retorna ao canal de origem com acesso completo.
+
+Internamente, o chatbot é composto por: um frontend React (canal web), um backend Go de orquestração, um backend Python de atendimento rodando no AWS Bedrock Runtime, e um **Fashion Agent** — microserviço Python separado também no Bedrock Runtime — responsável pela busca de catálogo. O canal WhatsApp é integrado via **Braze**. As consultas de pedido são feitas via API ao Orders Microservice. O catálogo é acessado via duas APIs externas: **Catalog Search API** (retorna SKUs por critério) e **Product API** (retorna detalhes e preço por SKU). A autenticação é gerenciada por um Auth Service em Go que encapsula uma instância Keycloak.
 
 ---
 
-## Business Service
+## Business Services
 
-**Atendimento ao Cliente**
+O chatbot entrega dois Business Services distintos pelo mesmo canal. O canal (web ou WhatsApp) é compartilhado, mas as capacidades de negócio são independentes.
 
-A capacidade que o negócio expõe ao cliente: obter respostas a dúvidas e informações sobre pedidos sem depender de suporte humano.
+### Atendimento ao Cliente
 
-- **Quem consome:** clientes existentes
+A capacidade de suporte pós-venda: responder dúvidas e consultar pedidos sem depender de atendimento humano.
+
+- **Quem consome:** clientes existentes com pedidos em aberto
 - **Realizado por:** FAQ Query + Order Status Inquiry + User Authentication application services
 - **Outcome de negócio:** redução do volume de chamados no suporte e autonomia do cliente
+
+### Descoberta de Catálogo
+
+A capacidade de explorar o catálogo de produtos por linguagem natural e receber sugestões visuais.
+
+- **Quem consome:** qualquer visitante — não exige autenticação
+- **Realizado por:** Product Catalog Search application service
+- **Outcome de negócio:** aumento de descoberta de produtos e conversão pré-venda
 
 ---
 
@@ -36,6 +48,7 @@ Os três serviços que a aplicação precisa oferecer para realizar o Business S
 |---|---|
 | **FAQ Query** | Capacidade de responder perguntas frequentes com base em uma base de conhecimento |
 | **Order Status Inquiry** | Capacidade de consultar o status dos pedidos de compra de um cliente |
+| **Product Catalog Search** | Capacidade de buscar produtos no catálogo por critério em linguagem natural e retornar uma lista de resultados |
 | **User Authentication** | Capacidade de autenticar um usuário antes de acessar dados protegidos |
 
 ---
@@ -50,9 +63,24 @@ Agrupamentos lógicos que realizam os Application Services, sem referência a te
 - Recebe mensagens de: React Frontend (canal web) e WhatsApp Connector (canal WhatsApp)
 
 **WhatsApp Connector**
-- Realiza: FAQ Query, Order Status Inquiry (via canal WhatsApp)
+- Realiza: FAQ Query, Order Status Inquiry, Product Catalog Search (via canal WhatsApp)
 - Depende de: Chatbot (repassa mensagens ao core), Identity Provider (redireciona para `/login` quando sessão ausente, e retorna ao WhatsApp após autenticação)
 - Recebe mensagens de: WhatsApp (via Braze)
+
+**Fashion Agent**
+- Realiza: Product Catalog Search
+- Depende de: Catalog Search (para obter lista de SKUs por critério), Product Catalog (para obter detalhes e preço de cada SKU)
+- Retorna: lista estruturada de produtos renderizada como carrossel pelo frontend
+
+**Catalog Search**
+- Realiza: Product Catalog Search (parcialmente — busca por SKU)
+- Expõe: API consumida pelo Fashion Agent
+- Nota: sistema externo, não pertence ao domínio do chatbot
+
+**Product Catalog**
+- Realiza: Product Catalog Search (parcialmente — detalhes por SKU)
+- Expõe: API consumida pelo Fashion Agent
+- Nota: sistema externo, não pertence ao domínio do chatbot
 
 **Order Management**
 - Realiza: Order Status Inquiry
@@ -74,7 +102,10 @@ As implementações concretas, com tecnologia e modelo de deploy definidos:
 | **React Frontend** | Interface do Chatbot (canal web) | React, servido em `/atendimento` |
 | **Chatbot Go Service** | Orquestração do Chatbot | Go, container em Kubernetes |
 | **Chatbot Python AI Service** | Inferência LLM do Chatbot | Python, AWS Bedrock Runtime |
+| **Fashion Agent Service** | Fashion Agent | Python, AWS Bedrock Runtime (microserviço separado) |
 | **Braze** | WhatsApp Connector | SaaS — recebe mensagens do WhatsApp e repassa ao Chatbot Go Service |
+| **Catalog Search API** | Catalog Search | API externa — retorna lista de SKUs por critério |
+| **Product API** | Product Catalog | API externa — retorna detalhes e preço por SKU |
 | **Orders Microservice** | Order Management | Go, container em Kubernetes |
 | **Auth Service** | Gateway do Identity Provider | Go, container em Kubernetes |
 | **Keycloak** | Core do Identity Provider | Keycloak, container em Kubernetes |
@@ -96,6 +127,8 @@ Os conceitos de negócio sobre os quais o sistema precisa guardar informação:
 - **FAQ Article** — um par de pergunta e resposta da base de conhecimento
 - **Chat Message** — uma mensagem individual trocada entre o cliente e o chatbot, com atributo `channel` (web | whatsapp)
 - **Conversation** — uma sessão de atendimento composta por uma sequência de Chat Messages, com atributo `channel` que identifica a origem
+- **Product** — um item do catálogo com descrição, atributos (cor, tamanho) e preço
+- **SKU** — a unidade de estoque que identifica univocamente uma variação de produto
 
 ---
 
@@ -119,6 +152,10 @@ Agrupamentos lógicos que estruturam as entidades com atributos e relacionamento
 - Agrupa: Conversation + Chat Messages (sequência de trocas entre cliente e chatbot)
 - Possui duas implementações físicas com propósitos distintos: acesso estruturado em tempo real (Go Service → PostgreSQL) e armazenamento bruto para contexto do LLM (Python AI Service → S3)
 
+**Product Catalog**
+- Agrupa: Product + SKU + atributos de produto (cor, tamanho, imagens, preço)
+- Pertence ao domínio externo de catálogo — não é armazenado pelo chatbot; é consumido via API pelo Fashion Agent
+
 ---
 
 ### Physical Data Components
@@ -133,6 +170,8 @@ As implementações concretas de storage, ligadas a tecnologia específica:
 | **Keycloak DB** | Sessões e credenciais de usuários | Gerenciado internamente pelo Keycloak | Keycloak |
 
 > **Um Logical Data Component, dois Physical Data Components.** O `Conversation History` é realizado por PostgreSQL e S3 simultaneamente — cada um servindo um propósito diferente: o Go Service salva no Postgres para consultas estruturadas em tempo real; o Python AI Service salva no S3 o histórico bruto para alimentar o contexto do LLM. Isso é válido no TOGAF: um Logical Data Component pode ter múltiplas implementações físicas quando os requisitos de acesso são diferentes.
+
+> **Logical Data Component sem Physical Data Component próprio.** O `Product Catalog` não tem Physical Data Component no domínio do chatbot — os dados vivem em sistemas externos acessados via API. Isso é válido: o TOGAF não exige que cada Logical Data Component seja realizado por storage próprio. Quando o dado pertence a outro domínio e é consumido via API, o Physical Data Component pertence ao domínio dono daquele dado.
 
 ---
 
@@ -207,12 +246,12 @@ O produto concreto escolhido para implementar cada Logical Technology Component 
 
 | Conceito | Instância neste sistema |
 |---|---|
-| **Business Service** | Atendimento ao Cliente |
-| **Application Service** | FAQ Query · Order Status Inquiry · User Authentication |
-| **Logical Application Component** | Chatbot · WhatsApp Connector · Order Management · Identity Provider |
-| **Physical Application Component** | React Frontend · Chatbot Go Service · Chatbot Python AI Service · Braze · Orders Microservice · Auth Service · Keycloak |
-| **Data Entity** | Customer · Order · FAQ Article · Chat Message · Conversation |
-| **Logical Data Component** | Customer Profile · Order History · Knowledge Base · Conversation History |
+| **Business Service** | Atendimento ao Cliente · Descoberta de Catálogo |
+| **Application Service** | FAQ Query · Order Status Inquiry · Product Catalog Search · User Authentication |
+| **Logical Application Component** | Chatbot · WhatsApp Connector · Fashion Agent · Catalog Search · Product Catalog · Order Management · Identity Provider |
+| **Physical Application Component** | React Frontend · Chatbot Go Service · Chatbot Python AI Service · Fashion Agent Service · Braze · Catalog Search API · Product API · Orders Microservice · Auth Service · Keycloak |
+| **Data Entity** | Customer · Order · FAQ Article · Chat Message · Conversation · Product · SKU |
+| **Logical Data Component** | Customer Profile · Order History · Knowledge Base · Conversation History · Product Catalog |
 | **Physical Data Component** | Chatbot PostgreSQL (AWS RDS) · Conversation Archive (AWS S3) · Orders DB · Keycloak DB |
 | **Technology Service** | Container Execution · LLM Inference · Data Persistence · External Channel Communication · Identity Token Management |
 | **Logical Technology Component** | Container Orchestrator · Managed LLM Runtime · Relational Database Engine · Object Store · Messaging Platform Adapter · Identity Server |
