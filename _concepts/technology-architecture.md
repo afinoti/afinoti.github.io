@@ -87,7 +87,7 @@ To understand how the three levels relate, consider a single infrastructure need
 
 **What it looks like:** Infrastructure-as-Code that provisions the actual resource:
 
-```hcl
+```terraform
 # terraform/eks-cluster.tf
 resource "aws_eks_cluster" "main" {
   name     = "production"
