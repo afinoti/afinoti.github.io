@@ -4,23 +4,9 @@ title: Service, Quality e Contract
 
 # Service, Quality e Contract
 
-No TOGAF, um **Business Service** define *o que* o negócio entrega. Mas essa definição por si só está incompleta: ela não diz *quão bem* o serviço deve operar, nem *com quem* o negócio firmou esse compromisso. É aqui que entram os três conceitos complementares: **Service**, **Quality** e **Contract**.
+No TOGAF, o [Business Service](/concepts/business-service) define *o que* o negócio entrega. Mas essa definição por si só está incompleta: ela não diz *quão bem* o serviço deve operar, nem *com quem* o negócio firmou esse compromisso.
 
-Os três formam uma unidade. Separar qualquer um deles deixa a arquitetura com uma lacuna.
-
----
-
-## Service
-
-No contexto de Service, Quality e Contract, "Service" não se refere a um novo tipo de artefato arquitetural — refere-se à **especificação funcional** do que é entregue. É a descrição do comportamento observável do serviço do ponto de vista do consumidor.
-
-Para um Business Service, isso significa responder:
-
-- Qual a função exposta?
-- Quem pode consumi-la?
-- Quais são as entradas e saídas esperadas?
-
-> O "Service" neste contexto é a face funcional do Business Service — o que ele faz, sem mencionar como ou com que qualidade.
+O trio **Service, Quality e Contract** não introduz novos artefatos arquiteturais — ele complementa o Business Service com duas dimensões que ele sozinho não cobre. O "Service" do trio *é* o próprio Business Service. Os conceitos genuinamente novos aqui são **Quality** e **Contract**.
 
 ---
 
@@ -58,33 +44,25 @@ No contexto de negócio, um Contract pode ser um SLA formal com um cliente exter
 
 ---
 
-## Como os três se vinculam ao Business Service
+## Como Quality e Contract completam o Business Service
 
 O Business Service é o ponto de partida — ele define a capacidade que o negócio expõe. Mas apenas o Business Service não é suficiente para governar a entrega. É preciso qualificar como ele opera e formalizar o compromisso com quem o consome.
 
 ```
-Business Service
-       │
-       ├── O que entrega? ───────────────── Service (especificação funcional)
+Business Service  ←── o "Service" do trio; já definido em Phase B
        │
        ├── Quão bem entrega? ────────────── Quality (atributos não-funcionais)
        │
        └── Com quem e sob quais termos? ─── Contract (acordo formal)
 ```
 
-Os três juntos tornam o Business Service **governável**: ele pode ser monitorado, auditado e renegociado quando necessário.
+Quality e Contract juntos tornam o Business Service **governável**: ele pode ser monitorado, auditado e renegociado quando necessário.
 
 ---
 
 ## Exemplo: Chatbot de Atendimento
 
 Usando o Business Service **"Atendimento ao Cliente"** do nosso [exemplo do chatbot](/examples/chatbot):
-
-**Service**
-- Função: receber dúvidas de clientes e retornar respostas sobre pedidos e FAQ
-- Consumidor: clientes autenticados via web ou WhatsApp
-- Entradas: mensagem de texto do usuário
-- Saídas: resposta textual, podendo incluir redirecionamento para login
 
 **Quality**
 - Disponibilidade: 99,5% em horário comercial
