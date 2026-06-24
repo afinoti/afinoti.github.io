@@ -64,16 +64,11 @@ Both processes realize the same Business Service. The Business Service definitio
 
 ### Business Function
 
+> **Note:** Business Function is a TOGAF building block that will not be used in this architecture. The role it plays — grouping stable business responsibilities — is covered by [Business Capability](/concepts/business-capability), which is more precise and better suited for capability-based planning. Where TOGAF literature references Business Function, treat it as equivalent to a Business Capability L1 or L2.
+
 A **Business Function** is a grouping of related business activities that share a common purpose — independent of how they are organized or by whom they are performed. It describes a stable area of business responsibility.
 
-While a Business Process is a flow with a start and end, a Business Function is a persistent capability area that the business maintains over time.
-
-**Examples:**
-- Customer Support — the ongoing capability to handle customer inquiries
-- Catalog Management — the ongoing capability to maintain and publish the product catalog
-- Identity Management — the ongoing capability to manage user credentials and access
-
-A Business Function can own multiple Business Processes and deliver multiple Business Services.
+While a Business Process is a flow with a start and end, a Business Function is a persistent capability area that the business maintains over time — a role that [Business Capability](/concepts/business-capability) fulfills in this architecture.
 
 ---
 
@@ -141,7 +136,7 @@ From our [chatbot example](/examples/chatbot), the Business Architecture view of
 4. System retrieves and returns the answer
 5. If unresolved: system offers human escalation
 
-**Business Function:** Customer Support — owns the Atendimento ao Cliente and any future support-related Business Services
+**Business Capability (L1):** Customer Support — agrupa as capabilities necessárias para realizar o Atendimento ao Cliente
 
 **Business Roles:** Customer (initiator) · Intent Classifier · Order Lookup · Responder
 
@@ -159,6 +154,6 @@ From our [chatbot example](/examples/chatbot), the Business Architecture view of
 |---|---|---|
 | **Business Service** | What does the business deliver, and to whom? | Implicitly — delivery can be manual or automated |
 | **Business Process** | How is it delivered, step by step? | Yes — steps can be manual, automated, or hybrid |
-| **Business Function** | What persistent capability area owns it? | Yes — a team or a system |
+| ~~**Business Function**~~ | *(not used — replaced by [Business Capability](/concepts/business-capability))* | — |
 | **Business Role** | What kind of actor is needed at each step? | Yes — a role is abstract; a human or system can fill it |
 | **Business Actor** | Who or what fills that role concretely? | Yes — a person, team, or automated system |

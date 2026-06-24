@@ -18,7 +18,7 @@ Uma **Business Capability** é o que o negócio **é capaz de fazer** — uma ha
 |---|---|---|---|
 | **Business Capability** | Interna — o que possuímos | *"Conseguimos fazer isso?"* | Não |
 | **Business Service** | Externa — o que entregamos | *"O que oferecemos, e para quem?"* | Não |
-| **Business Function** | Interna — que área agrupa as atividades | *"Quem é responsável por isso?"* | Não |
+| ~~**Business Function**~~ | *(não utilizado nesta arquitetura — o papel que exerceria é coberto por Business Capability)* | — | — |
 | **Business Process** | Execução — como entregamos | *"Como isso acontece, passo a passo?"* | Sim |
 
 A distinção central entre **Business Capability** e **Business Service** é de perspectiva:
